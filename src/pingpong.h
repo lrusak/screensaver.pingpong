@@ -93,6 +93,7 @@ protected:
   bool OnEnabled() override;
 
   glm::mat4 m_projMat;
+  GLuint m_vao = 0;
   GLuint m_vertexVBO;
   GLuint m_indexVBO;
   GLint m_uProjMatrix = -1;

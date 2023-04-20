@@ -27,7 +27,8 @@ CPingPong::CPingPong()
   std::string vertShader = kodi::addon::GetAddonPath("resources/shaders/" GL_TYPE_STRING "/vert.glsl");
   if (!LoadShaderFiles(vertShader, fraqShader) || !CompileAndLink())
     return;
-  
+
+  glGenVertexArrays(1, &m_vao);
   glGenBuffers(1, &m_vertexVBO);
   glGenBuffers(1, &m_indexVBO);
 #endif
@@ -38,10 +39,10 @@ CPingPong::CPingPong()
 CPingPong::~CPingPong()
 {
 #ifndef WIN32
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
   glDeleteBuffers(1, &m_vertexVBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glDeleteBuffers(1, &m_indexVBO);
+
+  glDeleteVertexArrays(1, &m_vao);
 #endif
 }
 
@@ -117,6 +118,8 @@ bool CPingPong::Draw(CRenderD3D* render)
   vert2 = AddQuad(vert2, m_Paddle[1].m_Pos, m_Paddle[1].m_Size, m_Paddle[1].m_Col);
 
 #ifndef WIN32
+  glBindVertexArray(m_vao);
+
   EnableShader();
 
   GLubyte idx[3*8];
@@ -147,7 +150,12 @@ bool CPingPong::Draw(CRenderD3D* render)
   glDisableVertexAttribArray(m_aPosition);
   glDisableVertexAttribArray(m_aColor);
 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
   DisableShader();
+
+  glBindVertexArray(0);
 #else
   render->DrawQuad(&vert[0]);
   render->DrawQuad(&vert[4]);
